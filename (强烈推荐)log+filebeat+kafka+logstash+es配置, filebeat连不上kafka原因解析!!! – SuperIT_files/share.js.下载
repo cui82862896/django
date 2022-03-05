@@ -1,0 +1,104 @@
+//<script src="//res.wx.qq.com/open/js/jweixin-1.1.0.js"></script>
+//<script>
+//var signPackage = eval(([$signPackage]));
+//var wxShareData1 = {
+//    "title": "这一刻 为成长开课",
+//    "desc": "解锁伊利成长公开课，开启你的成长一刻！",
+//    "link": location.href,
+//    "imgUrl": "http://static.hd.weibo.com/static/minisite/chengzhanggongkaike/img/share.jpg",
+//};
+//
+//var wbShareData1 = {
+//    'icon': 'http://static.hd.weibo.com/static/minisite/chengzhanggongkaike/img/share.jpg',
+//    'desc': '这一刻 为成长开课',
+//    'title': '解锁伊利成长公开课，开启你的成长一刻！'
+//};
+
+//var signPackage;
+//var d={url:encodeURIComponent(location.href)};
+//jQuery(document).ready(function(){
+//	jQuery.post("/share.php",d,function(data){
+//        console.log(data);
+//        signPackage=eval((data));
+//        
+//        
+//    });
+//});
+
+var signPackage;   
+var userAgent = navigator.userAgent;
+var pattern_wx = /MicroMessenger/;
+var pattern_weibo = /weibo/;
+var pattern_qq = /qq/;
+
+var share = share || {};
+var share = {
+    wxInit: function(){
+        wx.onMenuShareTimeline(wxShareData);
+        wx.onMenuShareAppMessage(wxShareData);
+        // wx.updateAppMessageShareData(wxShareData);
+        // wx.updateTimelineShareData(wxShareData);
+    },
+    wbInit: function(){
+        WeiboJSBridge.invoke("setSharingContent", {
+            "external": wbShareData
+        });
+    }
+}
+
+if(pattern_wx.test(userAgent)){
+	var d={url:encodeURIComponent(location.href)};
+	jQuery(document).ready(function(){
+		jQuery.post("/share.php",d,function(data){
+	        //console.log(data);
+	        signPackage=eval('(['+data+'])');
+	        signPackage=signPackage[0];
+	        
+	        wx.config({
+	            debug: false,
+	            appId: signPackage['appId'],
+	            timestamp: signPackage['timestamp'],
+	            nonceStr: signPackage['nonceStr'],
+	            signature: signPackage['signature'],
+	            jsApiList: [
+	                // 所有要调用的 API 都要加到这个列表中
+	                //'checkJsApi',
+	                'onMenuShareTimeline',
+	                'onMenuShareAppMessage'
+	                // 'onMenuShareQQ',
+	                // 'updateAppMessageShareData',
+	                // 'updateTimelineShareData'
+	            ]
+	        });
+	        
+	        wx.ready(function () {
+	            wxShareData = wxShareData1;
+	            share.wxInit();
+	        });
+	        
+	    });
+	});
+	
+}
+
+
+if (window.WeiboJSBridge) {
+    wbShareData = wbShareData1;
+    share.wbInit();
+} else {
+    document.addEventListener('WeiboJSBridgeReady', function () {
+        wbShareData = wbShareData1;
+        share.wbInit();
+    });
+}
+
+function setshare(){
+    if(pattern_wx.test(userAgent)){
+        share.wxInit();
+    }
+    if(pattern_weibo.test(userAgent)){
+        share.wbInit();
+    }
+}
+
+//</script>
